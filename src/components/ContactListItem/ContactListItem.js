@@ -1,25 +1,30 @@
 import css from "./ContactListItem.module.css";
 import React from "react";
 import PropTypes from "prop-types";
+import { useDispatch } from "react-redux";
+import { Notify } from "notiflix";
+import { handleRemoveContact } from "../../redux/contacts/contactsSlice";
 
-const ContactListItem = ({
-    contactName,
-    contactNumber,
-    onClickDeleteContact, }) => {
-    
-    return (
+function ContactListItem({ name, number, id }) {
+  const dispatch = useDispatch();
+
+  return (
         <li className={css.listItem}>
-            <span className={css.listItemText}>{contactName}:</span>
-            <span className={css.listItemText}>{contactNumber}</span>
-            <button className={css.button} type="button" onClick={onClickDeleteContact}>Delete</button>
+            <span className={css.listItemText}>{name}:</span>
+            <span className={css.listItemText}>{number}</span>
+            <button className={css.button} type="button" onClick={() =>
+              dispatch(
+              handleRemoveContact(id),
+              Notify.success("Contact was deleted"),
+                )}>Delete</button>
         </li>
   );
-};
+}
 
 ContactListItem.propTypes = {
-  contactName: PropTypes.string.isRequired,
-  contactNumber: PropTypes.string.isRequired,
-  onClickDeleteContact: PropTypes.func.isRequired,
+  id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  number: PropTypes.string.isRequired,
 };
 
 export default ContactListItem;

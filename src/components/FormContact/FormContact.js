@@ -1,59 +1,81 @@
 import css from "./FormContact.module.css";
-import PropTypes from "prop-types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { nanoid } from "nanoid";
+import { useDispatch, useSelector } from "react-redux";
+import { Notify } from "notiflix";
+import { handleAddContact } from "../../redux/contacts/contactsSlice";
 
-export default function ContactForm({ onSubmit }) {
-  const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
 
-  const handleChange = (event) => {
-    
-  const {name, value} = event.currentTarget;
-    switch (name) {
-      case 'name':
-        setName(value);
-        break;
-      case 'number':
-        setNumber(value);
-        break;
+function FormContact() {
+  const dispatch = useDispatch();
+  const contacts = useSelector(state => state.contacts.items);
+  const [form, setForm] = useState({
+    name: "",
+    number: "",
+  });
 
-      default:
-        break;
+
+  const handleChangeForm = ({ target }) => {
+    const { name, value } = target;
+    setForm(prevForm => ({ ...prevForm, [name]: value }));
+  };
+  const { name, number } = form;
+
+
+
+  const isUniqueContact = () => {
+    const isExistContact = contacts.find(contact => contact.name === name);
+    if (isExistContact) {
+      Notify.failure("Contact is already exist");
     }
+    return !isExistContact;
   };
 
-  const handleSubmit = (event) => {
-   
-        event.preventDefault();
-        onSubmit(name, number);
-        setName('');
-        setNumber('');
-  };
-  
-  // const reset = () => {
-  //   setName('');
-  //   setNumber('');
-  //       // this.textInput.current.focus();
-  //   }
-  
 
-    // constructor(props) {
-    //     super(props);
-    //     this.textInput = React.createRef();
-    // }
+  const validateForm = () => {
+    if (!name || !number) {
+      Notify.failure("Some field is empty");
+      return false;
+    }
+    return isUniqueContact(name);
+  };
+
+
+
+  const handleFormSubmit = event => {
+    event.preventDefault();
+    const isValidateForm = validateForm();
+    if (!isValidateForm) return;
+
+    dispatch(
+      handleAddContact({ id: nanoid(), name, number }),
+      Notify.success("Contact was added to phonebook"),
+    );
+    const resetForm = () => setForm({ name: "", number: "" });
+    resetForm();
+  };
+
+
+
+  useEffect(() => {
+    if (contacts) {
+      localStorage.setItem("contacts", JSON.stringify(contacts));
+    }
+  }, [contacts]);
+
 
     return (
-      <form className={css.form} onSubmit={handleSubmit}>
+      <form className={css.form} onSubmit={handleFormSubmit}>
         <label className={css.label} htmlFor="">
           Name
             <input
-            // ref={this.textInput}
             className={css.input}
             type="text"
             name="name"
+            placeholder="Enter name"
             pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
             value={name}
-            onChange={handleChange}
+            onChange={handleChangeForm}
             title="Имя может состоять только из букв, апострофа, тире и пробелов. Например Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan и т. п."
             required
           />
@@ -64,9 +86,10 @@ export default function ContactForm({ onSubmit }) {
             className={css.input}
             type="tel"
             name="number"
+            placeholder="Enter phone number"
             pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
             value={number}
-            onChange={handleChange}
+            onChange={handleChangeForm}
             title="Номер телефона должен состоять цифр и может содержать пробелы, тире, круглые скобки и может начинаться с +"
             required
           />
@@ -79,6 +102,4 @@ export default function ContactForm({ onSubmit }) {
   ); 
 }
 
-ContactForm.propTypes = {
-        onSubmit: PropTypes.func.isRequired,
-    };
+export default FormContact;
