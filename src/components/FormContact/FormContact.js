@@ -1,71 +1,59 @@
 import css from "./FormContact.module.css";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { nanoid } from "nanoid";
 import { useDispatch, useSelector } from "react-redux";
 import { Notify } from "notiflix";
-import { handleAddContact } from "../../redux/contacts/contactsSlice";
+import { addUser } from '../../redux/contacts/contacts-actions';
+import { itemsSelector } from '../../redux/contacts/contacts-selectors';
 
 
 function FormContact() {
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const contacts = useSelector(itemsSelector);
   const dispatch = useDispatch();
-  const contacts = useSelector(state => state.contacts.items);
-  const [form, setForm] = useState({
-    name: "",
-    number: "",
-  });
 
 
-  const handleChangeForm = ({ target }) => {
-    const { name, value } = target;
-    setForm(prevForm => ({ ...prevForm, [name]: value }));
-  };
-  const { name, number } = form;
+ const handlerChange = ({ target: { name, value } }) => {
+    switch (name) {
+      case 'name':
+        setName(value);
+        break;
+      case 'phone':
+        setPhone(value);
+        break;
 
-
-
-  const isUniqueContact = () => {
-    const isExistContact = contacts.find(contact => contact.name === name);
-    if (isExistContact) {
-      Notify.failure("Contact is already exist");
+      default:
+        break;
     }
-    return !isExistContact;
   };
 
 
-  const validateForm = () => {
-    if (!name || !number) {
-      Notify.failure("Some field is empty");
-      return false;
-    }
-    return isUniqueContact(name);
-  };
-
-
-
-  const handleFormSubmit = event => {
+    const handlerSubmit = event => {
     event.preventDefault();
-    const isValidateForm = validateForm();
-    if (!isValidateForm) return;
-
-    dispatch(
-      handleAddContact({ id: nanoid(), name, number }),
-      Notify.success("Contact was added to phonebook"),
-    );
-    const resetForm = () => setForm({ name: "", number: "" });
-    resetForm();
-  };
-
-
-
-  useEffect(() => {
-    if (contacts) {
-      localStorage.setItem("contacts", JSON.stringify(contacts));
+    const id = nanoid();
+    if (!name || !phone) {
+      Notify.failure("Some field is empty");
+      return;
     }
-  }, [contacts]);
+    const inContacts = contacts?.some(
+      item => item.name.toLowerCase() === name.toLowerCase()
+    );
+
+    if (inContacts) {
+      Notify.failure("Contact is already exist");
+      return;
+    }
+
+      dispatch(addUser({ name, phone, id }),
+      Notify.success("Contact was added to phonebook"));
+    setName('');
+    setPhone('');
+  };
 
 
     return (
-      <form className={css.form} onSubmit={handleFormSubmit}>
+      <form className={css.form} onSubmit={handlerSubmit}>
         <label className={css.label} htmlFor="">
           Name
             <input
@@ -75,7 +63,7 @@ function FormContact() {
             placeholder="Enter name"
             pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
             value={name}
-            onChange={handleChangeForm}
+            onChange={handlerChange}
             title="Имя может состоять только из букв, апострофа, тире и пробелов. Например Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan и т. п."
             required
           />
@@ -85,11 +73,11 @@ function FormContact() {
           <input
             className={css.input}
             type="tel"
-            name="number"
+            name="phone"
             placeholder="Enter phone number"
             pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
-            value={number}
-            onChange={handleChangeForm}
+            value={phone}
+            onChange={handlerChange}
             title="Номер телефона должен состоять цифр и может содержать пробелы, тире, круглые скобки и может начинаться с +"
             required
           />
