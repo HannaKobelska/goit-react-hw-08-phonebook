@@ -30,12 +30,14 @@ function FormContact() {
 
 
     const handlerSubmit = event => {
-    event.preventDefault();
+      event.preventDefault();
+      
     const id = nanoid();
     if (!name || !phone) {
       Notify.failure("Some field is empty");
       return;
-    }
+      }
+      
     const inContacts = contacts?.some(
       item => item.name.toLowerCase() === name.toLowerCase()
     );

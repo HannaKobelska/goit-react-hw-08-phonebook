@@ -1,5 +1,7 @@
 .listItem {
     margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
 }
 
 .listItemText {
@@ -16,8 +18,8 @@
     border: 1px solid rgb(60, 58, 58);
 }
 
-.button:hover,
-.button:focus {
+.button:hover:enabled,
+.button:focus:enabled {
     background-color: rgb(255, 121, 62);
     color: #fff;
     border-color: transparent;

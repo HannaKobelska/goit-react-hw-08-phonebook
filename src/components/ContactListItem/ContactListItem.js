@@ -10,9 +10,11 @@ function ContactListItem({ name, phone, onDelete, id }) {
   const loading = useSelector(loadingSelector);
   
   return (
-        <li className={css.listItem}>
+    <li className={css.listItem}>
+      <div>
             <span className={css.listItemText}>{name}:</span>
-            <span className={css.listItemText}>{phone}</span>
+      <span className={css.listItemText}>{phone}</span>
+      </div>
       <button className={css.button} type="button" disabled={loading} onClick={() =>
         onDelete(id)
       
