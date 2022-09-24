@@ -32,7 +32,8 @@ function FormContact() {
     const handlerSubmit = event => {
       event.preventDefault();
       
-    const id = nanoid();
+      const id = nanoid();
+      
     if (!name || !phone) {
       Notify.failure("Some field is empty");
       return;
