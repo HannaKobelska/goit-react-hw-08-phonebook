@@ -1,41 +1,52 @@
-import css from "../ContactsList/ContactList.module.css";
+
 import React from "react";
 import ContactListItem from "../ContactListItem/ContactListItem";
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
-import { deleteUser, getUsers } from '../../redux/contacts/contacts-actions';
+import { deleteContact, getContacts } from '../../redux/contacts/contacts-actions';
 import { filterSelector, itemsSelector } from '../../redux/contacts/contacts-selectors';
+import { useEffect } from 'react';
+import { getIsLogin } from '../../redux/auth/auth-selectors';
+import List from '@mui/material/List';
+
 
 function ContactsList() {
  
   const items = useSelector(itemsSelector);
   const filter = useSelector(filterSelector);
   const dispatch = useDispatch();
+
+  const isLogin = useSelector(getIsLogin);
   const contacts = items?.filter(({ name }) =>
     name.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
   );
 
 
   useEffect(() => {
-    dispatch(getUsers());
-  }, [dispatch]);
+    isLogin && dispatch(getContacts());
+  }, [dispatch, isLogin]);
 
-  const deleteContact = id => {
-    dispatch(deleteUser(id));
+  const deleteContactItem = id => {
+    dispatch(deleteContact(id));
   };
 
   return (
-          <ul className={css.list}>
-          {contacts?.map(({ id, name, phone }) => (
+    <>
+       <List sx={{width: '100%', display: "flex", flexWrap: "wrap", gap: "40px", justifyContent: "center"}} >
+       {contacts.map(({ id, name, number }) => (
               <ContactListItem
               key={id}
               id={id}
               name={name}
-              phone={phone}
-              onDelete={deleteContact}
+              number={number}
+              onDelete={deleteContactItem}
               />
           ))}
-          </ul>
+    </List>
+      
+
+  
+    </>
+         
       );
 }
 

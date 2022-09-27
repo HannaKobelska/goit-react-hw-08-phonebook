@@ -1,19 +1,42 @@
 import { createAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { getContacts, postContact, deleteContact } from '../../API/contactsApi';
+import axios from 'axios';
+import { Notify } from "notiflix";
 
 
-export const getUsers = createAsyncThunk('contacts/get', async () => {
-  return await getContacts();
+export const getContacts = createAsyncThunk('contacts/get', async () => {
+  try {
+    const { data } = await axios.get('/contacts');
+    return data;
+  } catch (error) {
+    Notify.failure("Error!", { position: 'right-bottom'});
+  }
 });
 
-export const addUser = createAsyncThunk('contacts/add', async contact => {
-  await postContact(contact);
-  return await getContacts();
+
+export const addContact = createAsyncThunk('contacts/add', async contact => {
+  try {
+    await axios.post('/contacts', contact);
+
+    const { data } = await axios.get('/contacts');
+    Notify.success("Contact was added!", { position: 'right-bottom'});
+    return data;
+  } catch (error) {
+    Notify.failure("Error! Contact was NOT added!", { position: 'right-bottom'});
+  }
 });
 
-export const deleteUser = createAsyncThunk('contacts/delete', async id => {
-  await deleteContact(id);
-  return await getContacts();
+
+export const deleteContact = createAsyncThunk('contacts/delete', async id => {
+  try {
+    await axios.delete(`/contacts/${id}`);
+
+    const { data } = await axios.get('/contacts');
+    Notify.info("Deleted!", { position: 'right-bottom'});
+    
+    return data;
+  } catch (error) {
+    Notify.failure("Error!", { position: 'right-bottom'});
+  }
 });
 
-export const filterUser = createAction('contacts/filter');
+export const filterContact = createAction('contacts/filter');

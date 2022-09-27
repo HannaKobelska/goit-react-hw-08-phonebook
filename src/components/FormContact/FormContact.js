@@ -1,15 +1,34 @@
-import css from "./FormContact.module.css";
 import { useState } from "react";
 import { nanoid } from "nanoid";
 import { useDispatch, useSelector } from "react-redux";
-import { Notify } from "notiflix";
-import { addUser } from '../../redux/contacts/contacts-actions';
+import { addContact } from '../../redux/contacts/contacts-actions';
 import { itemsSelector } from '../../redux/contacts/contacts-selectors';
+import { Notify } from "notiflix";
+import { NavLink } from 'react-router-dom';
+import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Box from '@mui/material/Box';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import styled from 'styled-components';
+
+
+const Link = styled(NavLink)`
+  text-decoration: none;
+  margin-left: auto;
+  margin-right: auto;
+  color: #ff4400;
+    &:hover {
+    color: rgb(178, 47, 0);
+
+  }
+`;
+
 
 
 function FormContact() {
   const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [number, setNumber] = useState('');
   const contacts = useSelector(itemsSelector);
   const dispatch = useDispatch();
 
@@ -19,8 +38,8 @@ function FormContact() {
       case 'name':
         setName(value);
         break;
-      case 'phone':
-        setPhone(value);
+      case 'number':
+        setNumber(value);
         break;
 
       default:
@@ -34,62 +53,79 @@ function FormContact() {
       
       const id = nanoid();
       
-    if (!name || !phone) {
-      Notify.failure("Some field is empty");
+    if (!name || !number) {
+      Notify.warning("Some field is empty!", { position: 'right-bottom'});
       return;
       }
       
-    const inContacts = contacts?.some(
+    const inContacts = contacts.some(
       item => item.name.toLowerCase() === name.toLowerCase()
     );
 
     if (inContacts) {
-      Notify.failure("Contact is already exist");
+      Notify.failure("Contact is already exist!", { position: 'right-bottom'});
       return;
     }
 
-      dispatch(addUser({ name, phone, id }),
-      Notify.success("Contact was added to phonebook"));
-    setName('');
-    setPhone('');
+      dispatch(addContact({ name, number, id }));
+      setName('');
+      setNumber('');
   };
 
 
-    return (
-      <form className={css.form} onSubmit={handlerSubmit}>
-        <label className={css.label} htmlFor="">
-          Name
-            <input
-            className={css.input}
-            type="text"
-            name="name"
-            placeholder="Enter name"
-            pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
-            value={name}
-            onChange={handlerChange}
-            title="Имя может состоять только из букв, апострофа, тире и пробелов. Например Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan и т. п."
-            required
-          />
-        </label>
-        <label className={css.label} htmlFor="">
-          Number
-          <input
-            className={css.input}
-            type="tel"
-            name="phone"
-            placeholder="Enter phone number"
-            pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
-            value={phone}
-            onChange={handlerChange}
-            title="Номер телефона должен состоять цифр и может содержать пробелы, тире, круглые скобки и может начинаться с +"
-            required
-          />
-        </label>
+  return (
+    <>
+      <Box
+              component="form"
+              sx={{
+                  '& .MuiTextField-root': { m: 2, width: '40ch' },
+                  display: 'flex',
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  ml: "auto",
+                  mr: "auto",
+                  
+              }}
+              noValidate
+              onSubmit={handlerSubmit}
+          >
+              <TextField
+                  required
+                  fullWidth
+                  label="Name"
+                  type="text"
+                  name="name"
+                  placeholder="Enter name"
+                  value={name}
+                  onChange={handlerChange}
+                  pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
+                  title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
+              />
+        
+              <TextField
+                  required
+                  fullWidth
+                  label="Number"
+                  type="tel"
+                  name="number"
+                  placeholder="Enter phone number"
+                  pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
+                  value={number}
+                  onChange={handlerChange}
+                  title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
+              />
+      
+            <Button variant="contained" size="large" type="submit" startIcon={<AddCircleOutlineIcon />}>Add contact</Button>
+      </Box>
+      
 
-        <button className={css.button} type="submit">
-          <span>Add contact</span>
-        </button>
-      </form>
+      <div style={{ display: "flex", justifyContent: "center"}}>
+         <Link to="/contacts" >
+            <KeyboardDoubleArrowUpIcon sx={{ fontSize: 40 }}/>
+        </Link>
+      </div>
+    </>
   ); 
 }
 
